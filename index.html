@@ -1,0 +1,519 @@
+<html><head><base href="https://stable-diffusion-gallery.websim.example/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Галерея Stable Diffusion</title><style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+.image-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+.image-card:hover {
+    transform: translateY(-5px);
+}
+.image-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+.image-card .caption {
+    padding: 15px;
+    text-align: center;
+    color: #333;
+}
+.image-card .filter-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+}
+.admin-panel {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.admin-panel h2 {
+    margin-top: 0;
+}
+.admin-panel input, .admin-panel textarea, .admin-panel select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.admin-panel button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+.admin-panel button:hover {
+    background-color: #45a049;
+}
+.filter-select {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+.filter-list {
+    list-style-type: none;
+    padding: 0;
+}
+.filter-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+}
+.filter-list button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.filter-list button:hover {
+    background-color: #d32f2f;
+}
+.generate-image-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+.prompt-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 10px;
+}
+#image-prompt {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    font-size: 16px;
+}
+#generate-image-btn {
+    padding: 10px 20px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-size: 16px;
+}
+#generate-image-btn:hover {
+    background-color: #1976D2;
+}
+.footer {
+    margin-top: 40px;
+    text-align: center;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.footer-text {
+    margin-right: 10px;
+    font-weight: bold;
+}
+.social-icon {
+    width: 24px;
+    height: 24px;
+    fill: #0088cc;
+    cursor: pointer;
+    transition: fill 0.3s ease;
+    margin-left: 10px;
+}
+.social-icon:hover {
+    fill: #0077b5;
+}
+.youtube-icon {
+    fill: #FF0000;
+}
+.youtube-icon:hover {
+    fill: #CC0000;
+}
+#loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+#previous-prompts {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+#previous-prompts p {
+    margin: 5px 0;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+#previous-prompts p:hover {
+    background-color: #e0e0e0;
+}
+</style></head><body>
+<div class="container">
+    <h1>Галерея Stable Diffusion</h1>
+    
+    <select id="filter-select" class="filter-select">
+        <option value="all">Все стили</option>
+    </select>
+
+    <div class="generate-image-container">
+        <div class="prompt-container">
+            <input type="text" id="image-prompt" placeholder="Введите подсказку для генерации изображения...">
+            <button id="generate-image-btn">Сгенерировать</button>
+        </div>
+        <div id="previous-prompts"></div>
+    </div>
+
+    <div id="admin-panel" class="admin-panel" style="display: none;">
+        <h2>Загрузить новое изображение</h2>
+        <form id="upload-form">
+            <input type="file" id="image-upload" accept="image/*" required>
+            <input type="text" id="image-title" placeholder="Название изображения" required>
+            <textarea id="image-caption" placeholder="Описание изображения" required></textarea>
+            <select id="image-filter" required>
+                <option value="">Выберите стиль</option>
+            </select>
+            <button type="submit">Загрузить изображение</button>
+        </form>
+
+        <h2>Управление фильтрами</h2>
+        <div id="filter-management">
+            <input type="text" id="new-filter" placeholder="Новый фильтр">
+            <button id="add-filter">Добавить фильтр</button>
+            <ul id="filter-list" class="filter-list">
+                <!-- Фильтры будут добавлены здесь динамически -->
+            </ul>
+        </div>
+    </div>
+    
+    <div class="gallery" id="image-gallery">
+        <!-- Images will be dynamically added here -->
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <span class="footer-text">Мои ресурсы:</span>
+            <svg class="social-icon telegram-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="telegram-icon">
+                <path d="M9.78,18.65L10.06,14.42L17.74,7.5C18.08,7.19 17.67,7.04 17.22,7.31L7.74,13.3L3.64,12C2.76,11.75 2.75,11.14 3.84,10.7L19.81,4.54C20.54,4.21 21.24,4.72 20.96,5.84L18.24,18.65C18.05,19.56 17.5,19.78 16.74,19.36L12.6,16.3L10.61,18.23C10.38,18.46 10.19,18.65 9.78,18.65Z"/>
+            </svg>
+            <svg class="social-icon youtube-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="youtube-icon">
+                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+            </svg>
+        </div>
+    </footer>
+</div>
+
+<div id="loading-overlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const gallery = document.getElementById('image-gallery');
+    const uploadForm = document.getElementById('upload-form');
+    const adminPanel = document.getElementById('admin-panel');
+    const filterSelect = document.getElementById('filter-select');
+    const imageFilterSelect = document.getElementById('image-filter');
+    const newFilterInput = document.getElementById('new-filter');
+    const addFilterBtn = document.getElementById('add-filter');
+    const filterList = document.getElementById('filter-list');
+    const generateImageBtn = document.getElementById('generate-image-btn');
+    const imagePromptInput = document.getElementById('image-prompt');
+    const telegramIcon = document.getElementById('telegram-icon');
+    const youtubeIcon = document.getElementById('youtube-icon');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const previousPromptsContainer = document.getElementById('previous-prompts');
+    
+    let isAdmin = false;
+    let currentImageIndex = 0;
+    let sampleImages = [];
+    let availableFilters = [];
+    let previousPrompts = [];
+
+    // Function to fetch images from server
+    function fetchImagesFromServer() {
+        fetch('/api/images')
+            .then(response => response.json())
+            .then(data => {
+                sampleImages = data;
+                renderGallery();
+            })
+            .catch(error => console.error('Error fetching images:', error));
+    }
+
+    // Initial fetch of images
+    fetchImagesFromServer();
+
+    // Function to fetch filters from server
+    function fetchFiltersFromServer() {
+        fetch('/api/filters')
+            .then(response => response.json())
+            .then(data => {
+                availableFilters = data;
+                updateFilterSelects();
+                updateFilterList();
+            })
+            .catch(error => console.error('Error fetching filters:', error));
+    }
+
+    // Initial fetch of filters
+    fetchFiltersFromServer();
+
+    // Function to update filter selects
+    function updateFilterSelects() {
+        filterSelect.innerHTML = '<option value="all">Все стили</option>';
+        imageFilterSelect.innerHTML = '<option value="">Выберите стиль</option>';
+        availableFilters.forEach(filter => {
+            filterSelect.innerHTML += `<option value="${filter}">${filter}</option>`;
+            imageFilterSelect.innerHTML += `<option value="${filter}">${filter}</option>`;
+        });
+    }
+
+    // Function to update filter list in admin panel
+    function updateFilterList() {
+        filterList.innerHTML = '';
+        availableFilters.forEach(filter => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                ${filter}
+                <button class="remove-filter" data-filter="${filter}">Удалить</button>
+            `;
+            filterList.appendChild(li);
+        });
+    }
+
+    // Function to create an image card
+    function createImageCard(image, index) {
+        const card = document.createElement('div');
+        card.className = 'image-card';
+        card.innerHTML = `
+            <img src="${image.src}" alt="${image.title}" width="300" height="200">
+            <div class="caption">
+                <h3>${image.title}</h3>
+                <p>${image.caption}</p>
+            </div>
+            <div class="filter-tag">${image.filter}</div>
+        `;
+        return card;
+    }
+    
+    // Function to render gallery
+    function renderGallery(filter = 'all') {
+        gallery.innerHTML = '';
+        const imagesToShow = filter === 'all' ? sampleImages : sampleImages.filter(image => image.filter === filter);
+        imagesToShow.slice(0, 6).forEach((image, index) => {
+            gallery.appendChild(createImageCard(image, index));
+        });
+    }
+    
+    // Filter change event
+    filterSelect.addEventListener('change', (e) => {
+        renderGallery(e.target.value);
+    });
+
+    // Add new filter
+    addFilterBtn.addEventListener('click', () => {
+        const newFilter = newFilterInput.value.trim();
+        if (newFilter && !availableFilters.includes(newFilter)) {
+            fetch('/api/filters', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ filter: newFilter })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchFiltersFromServer();
+                    newFilterInput.value = '';
+                    alert('Новый фильтр успешно добавлен');
+                } else {
+                    alert('Ошибка при добавлении фильтра');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при добавлении фильтра');
+            });
+        }
+    });
+
+    // Remove filter
+    filterList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-filter')) {
+            const filterToRemove = e.target.getAttribute('data-filter');
+            fetch(`/api/filters/${filterToRemove}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchFiltersFromServer();
+                    alert('Фильтр успешно удален');
+                } else {
+                    alert('Ошибка при удалении фильтра');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при удалении фильтра');
+            });
+        }
+    });
+
+    // Function to update previous prompts
+    function updatePreviousPrompts() {
+        previousPromptsContainer.innerHTML = '';
+        previousPrompts.forEach(prompt => {
+            const p = document.createElement('p');
+            p.textContent = prompt;
+            p.addEventListener('click', () => {
+                imagePromptInput.value = prompt;
+            });
+            previousPromptsContainer.appendChild(p);
+        });
+    }
+
+    // Generate image
+    generateImageBtn.addEventListener('click', () => {
+        const prompt = imagePromptInput.value.trim();
+        if (!prompt) {
+            alert('Пожалуйста, введите подсказку для генерации изображения');
+            return;
+        }
+
+        // Add the new prompt to the list of previous prompts
+        if (!previousPrompts.includes(prompt)) {
+            previousPrompts.unshift(prompt);
+            if (previousPrompts.length > 5) {
+                previousPrompts.pop();
+            }
+            updatePreviousPrompts();
+        }
+
+        // Show loading overlay
+        loadingOverlay.style.display = 'flex';
+
+        fetch('/api/generate-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: prompt })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const newImage = {
+                    src: data.imageUrl,
+                    title: prompt,
+                    caption: `Сгенерировано с помощью Stable Diffusion`,
+                    filter: data.filter || 'Другое'
+                };
+                sampleImages.unshift(newImage);
+                renderGallery(filterSelect.value);
+                imagePromptInput.value = '';
+                alert('Новое изображение успешно сгенерировано и добавлено в галерею!');
+            } else {
+                alert('Ошибка при генерации изображения');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при генерации изображения');
+        })
+        .finally(() => {
+            // Hide loading overlay
+            loadingOverlay.style.display = 'none';
+        });
+    });
+
+    // Open Telegram channel on icon click
+    telegramIcon.addEventListener('click', () => {
+        window.open('https://t.me/stable_dif', '_blank');
+    });
+
+    // Open YouTube channel on icon click
+    youtubeIcon.addEventListener('click', () => {
+        window.open('https://www.youtube.com/@StableDiff/videos', '_blank');
+    });
+
+    // Initial update of previous prompts
+    updatePreviousPrompts();
+
+    // Initial render of gallery with 6 latest generations
+    renderGallery();
+});
+</script>
+</body></html>
